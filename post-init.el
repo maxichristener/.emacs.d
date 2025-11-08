@@ -1,7 +1,8 @@
-;;;; post-init.el (maxi)
+;;; post-init.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
 
 ;; Literate config
-(straight-use-package 'org)
+;;(straight-use-package 'org)
+(require 'org)
 (org-babel-load-file
  (expand-file-name
   "config.org"
@@ -13,7 +14,7 @@
 ;; It supports core Markdown syntax as well as extensions like GitHub Flavored
 ;; Markdown (GFM).
 (use-package markdown-mode
-  :straight t
+  :ensure t
   :commands (gfm-mode
              gfm-view-mode
              markdown-mode
@@ -28,7 +29,7 @@
 ;; TOC... why not?
 ;; Automatically generate a table of contents when editing Markdown files
 (use-package markdown-toc
-  :straight t
+  :ensure t
   :commands (markdown-toc-generate-toc
              markdown-toc-generate-or-refresh-toc
              markdown-toc-delete-toc

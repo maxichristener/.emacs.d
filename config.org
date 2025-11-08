@@ -3,25 +3,23 @@
 #+STARTUP: overview
 #+OPTIONS: toc:2
 
+* Índice :TOC:
+- [[#intro][Intro]]
+  - [[#sobre-org-mode][Sobre Org Mode]]
+- [[#config][Config]]
+  - [[#general-confs][General confs]]
+  - [[#python][Python]]
+  - [[#magit][Magit]]
+  - [[#keybindings][Keybindings]]
+  - [[#terminal][Terminal]]
+  - [[#marginalia][Marginalia]]
+  - [[#org-mode][Org Mode]]
+  - [[#completion-company-mode][Completion: Company mode]]
+  - [[#tree-sitter-integration][Tree-sitter Integration]]
+  - [[#dired][Dired]]
+  - [[#evil-mode][Evil Mode]]
+
 * Intro
-** Instalación
-Una vez hecha la instación de GNU Emacs (vanilla), se verifican
-dependencias necesarias: =cmake=, =libvterm=, =hunspell= y =hunspell-es_ar=.
-Luego, crear las carpetas =autosaves= y =backups=. 
-
-Para que todo funcione, primero debemos crear un =early-init.el= para
-incluir =(setq package-enable-at-startup nil)= en el inicio. Luego, hay que
-cargar los modulos de esta carpeta con el siguiente =init.el=
-
-
-Ya podemos iniciar Emacs por primera vez. Tras hacerlo, correr =M-x
-all-the-icons-install-fonts= y, en shell, =fc-cache -fv=.
-
-** Algunas características
-
-- =C-c C-r m= activa el modo oscuro en PDFs.
-- =org-tree-slide= para hacer presentaciones con Org Mode.
-
 ** Sobre Org Mode
 
 Los modos son
@@ -52,22 +50,162 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
 
 ** General confs
 #+begin_src emacs-lisp
-(load-theme 'modus-vivendi)
-;; When Delete Selection mode is enabled, typed text replaces the selection
-;; if the selection is active.
-(delete-selection-mode 1)
+  (load-theme 'modus-vivendi)
+  ;; When Delete Selection mode is enabled, typed text replaces the selection
+  ;; if the selection is active.
+  (delete-selection-mode 1)
+  ;; Display the current line and column numbers in the mode line
+  (setq line-number-mode t)
+  (setq column-number-mode t)
+  (setq mode-line-position-column-line-format '("%l:%C"))
 
-;; Display the current line and column numbers in the mode line
-(setq line-number-mode t)
-(setq column-number-mode t)
-(setq mode-line-position-column-line-format '("%l:%C"))
+  ;; Display of line numbers in the buffer:
+  (setq-default display-line-numbers-type 'relative)
+  (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+    (add-hook hook #'display-line-numbers-mode))
 
-;; Display of line numbers in the buffer:
-(setq-default display-line-numbers-type 'relative)
-(dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
-  (add-hook hook #'display-line-numbers-mode))
+  ;; packages
+  (setq package-pinned-packages
+      '((annalist                      . "melpa-stable")
+        (ansible-doc                   . "melpa-stable")
+        (apheleia                      . "melpa-stable")
+        (basic-mode                    . "melpa-stable")
+        (consult-dir                   . "melpa-stable")
+        (corfu-prescient               . "melpa-stable")
+        (dtrt-indent                   . "melpa-stable")
+        (dumb-jump                     . "melpa-stable")
+        (elisp-refs                    . "melpa-stable")
+        (evil-collection               . "melpa-stable")
+        (f                             . "melpa-stable")
+        (flymake-quickdef              . "melpa-stable")
+        (groovy-mode                   . "melpa-stable")
+        (highlight-defined             . "melpa-stable")
+        (markdown-toc                  . "melpa-stable")
+        (org-appear                    . "melpa-stable")
+        (package-lint-flymake          . "melpa-stable")
+        (parent-mode                   . "melpa-stable")
+        (php-mode                      . "melpa-stable")
+        (prescient                     . "melpa-stable")
+        (s                             . "melpa-stable")
+        (tocus                         . "melpa-stable")
+        (treesit-auto                  . "melpa-stable")
+        (vertico-prescient             . "melpa-stable")
+        (visual-fill-column            . "melpa-stable")
+        (yasnippet-snippets            . "melpa-stable")
+        (ace-window                    . "gnu")
+        (aggressive-indent             . "gnu")
+        (avy                           . "gnu")
+        (cape                          . "gnu")
+        (compat                        . "gnu")
+        (consult                       . "gnu")
+        (corfu                         . "gnu")
+        (csv-mode                      . "gnu")
+        (dash                          . "gnu")
+        (diff-hl                       . "gnu")
+        (diminish                      . "gnu")
+        (easy-escape                   . "gnu")
+        (embark                        . "gnu")
+        (embark-consult                . "gnu")
+        (expand-region                 . "gnu")
+        (gcmh                          . "gnu")
+        (indent-bars                   . "gnu")
+        (marginalia                    . "gnu")
+        (modus-themes                  . "gnu")
+        (orderless                     . "gnu")
+        (org                           . "gnu")
+        (rainbow-mode                  . "gnu")
+        (transient                     . "gnu")
+        (vertico                       . "gnu")
+        (yasnippet                     . "gnu")
+        (ztree                         . "gnu")
+        (eat                           . "nongnu")
+        (edit-indirect                 . "nongnu")
+        (evil-visualstar               . "nongnu")
+        (exec-path-from-shell          . "nongnu")
+        (git-modes                     . "nongnu")
+        (golden-ratio                  . "nongnu")
+        (goto-chg                      . "nongnu")
+        (gptel                         . "nongnu")
+        (lua-mode                      . "nongnu")
+        (magit                         . "nongnu")
+        (markdown-mode                 . "nongnu")
+        (package-lint                  . "nongnu")
+        (page-break-lines              . "nongnu")
+        (paredit                       . "nongnu")
+        (popup                         . "nongnu")
+        (rainbow-delimiters            . "nongnu")
+        (undo-fu                       . "nongnu")
+        (undo-fu-session               . "nongnu")
+        (wgrep                         . "nongnu")
+        (with-editor                   . "nongnu")
+        (ws-butler                     . "nongnu")
+        (yaml-mode                     . "nongnu")))
 #+end_src
 
+** Python
+#+begin_src emacs-lisp
+  ;; python
+  (use-package uv-mode
+    :ensure t
+    :hook (python-mode . uv-mode-auto-activate-hook))
+  (add-hook 'python-mode-hook #'electric-pair-mode)
+#+end_src
+** Magit
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t)
+#+end_src
+
+** Keybindings
+#+begin_src emacs-lisp
+;; e.g. (keymap-set c-mode-map "C-S-l" 'function-name)
+(keymap-global-set "C-x C-a" #'auto-fill-mode)
+(keymap-global-set "C-x v t" #'vterm)
+#+end_src
+
+** Terminal
+#+begin_src emacs-lisp
+  ;;; vterm
+  (use-package vterm
+    :ensure t
+    :init 
+    (setq vterm-shell "/bin/zsh"))
+
+  ;; eshell
+  (use-package eshell-syntax-highlighting
+    :ensure t
+    :after esh-mode
+    :config
+    (eshell-syntax-highlighting-global-mode +1))
+  ;; eshell-syntax-highlighting -- adds fish/zsh-like syntax highlighting.
+
+  ;; eshell-rc-script -- your profile for eshell; like a bashrc for eshell.
+  ;; eshell-aliases-file -- sets an aliases file for the eshell.
+  (setq ;;eshell-rc-script (concat user-emacs-directory "eshell/profile")
+   ;;eshell-aliases-file (concat user-emacs-directory "eshell/aliases")
+   eshell-history-size 5000
+   eshell-buffer-maximum-lines 5000
+   eshell-hist-ignoredups t
+   eshell-scroll-to-bottom-on-input t
+   eshell-destroy-buffer-when-process-dies t
+   eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+#+end_src
+** Marginalia
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :ensure t
+    ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+    ;; available in the *Completions* buffer, add it to the
+    ;; `completion-list-mode-map'.
+    :bind (:map minibuffer-local-map
+           ("M-A" . marginalia-cycle))
+    ;; The :init section is always executed.
+    :init
+    ;; Marginalia must be activated in the :init section of use-package such that
+    ;; the mode gets enabled right away. Note that this forces loading the
+    ;; package.
+    (marginalia-mode))
+#+end_src
 ** Org Mode
 Emacs todavía existe gracias a Org Mode. Una lástima que no se haya
 convertido en un estándar como Markdown
@@ -77,7 +215,7 @@ convertido en un estándar como Markdown
 
   ;;; Bullets
   (use-package org-bullets
-    :straight t)
+    :ensure t)
   (add-hook 'org-mode-hook
   	  (lambda () (org-bullets-mode 1)))
 
@@ -114,31 +252,41 @@ convertido en un estándar como Markdown
   ;;                       :height (cdr face))) 
 
   ;;; TOC
-  ;; (use-package toc-org
-  ;;   :straight t
-  ;;   :commands toc-org-enable)
-  ;; (add-hook 'org-mode-hook 'toc-org-enable)
+  (use-package toc-org
+    :ensure t
+    :commands toc-org-enable)
+  (add-hook 'org-mode-hook 'toc-org-enable)
 
-  ;; org indent
+
+  ;; org indent                         
   ;; (add-hook 'org-mode-hook 'org-indent-mode)
 
   ;;; Presentations
   ;; (use-package org-tree-slide
-  ;;   :straight t :custom (org-image-actual-width nil))
+  ;;   :ensure t :custom (org-image-actual-width nil))
   ;; (add-hook 'org-tree-slide-mode-hook (lambda () (display-line-numbers-mode 0)))
   ;; ;;(setq-default header-line-format " ")
   ;; ;; Para ver en html
   ;; (use-package ox-reveal
-  ;;   :straight t)
+  ;;   :ensure t)
 #+END_SRC
 
 ** Completion: Company mode
 #+begin_src emacs-lisp
-;;; company-mode
-(use-package company
- :straight t
- :config (add-hook 'after-init-hook 'global-company-mode))
-(setq company-idle-delay 0.15)
+  ;;; company-mode
+  (use-package company
+   :ensure t
+   :config (add-hook 'after-init-hook 'global-company-mode)
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+  ;; To prevent default down-casing.
+  ;; https://emacs.stackexchange.com/questions/10837/how-to-make-company-mode-be-case-sensitive-on-plain-text
+  (setq company-dabbrev-downcase nil)
+  (setq company-dabbrev-ignore-case nil)
+  (setq company-dabbrev-code-ignore-case nil))
+  ;; enable company everywhere
+  (add-hook 'after-init-hook 'global-company-mode)
 #+end_src
 
 ** Tree-sitter Integration
@@ -161,7 +309,7 @@ file types. Enabling global-treesit-auto-mode applies this behavior globally,
 improving syntax accuracy and consistency across supported languages.
 #+begin_src emacs-lisp
 (use-package treesit-auto
-  :straight t
+  :ensure t
   :custom
   (treesit-auto-install 'prompt)
   :config
@@ -179,7 +327,7 @@ improving syntax accuracy and consistency across supported languages.
 ;; of your `~/.emacs.d/post-init.el` file, before all other packages.
 (use-package compile-angel
   :demand t
-  :straight t
+  :ensure t
   :custom
   ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
   ;; Drawback: The minibuffer will not display compile-angel's actions.
@@ -232,13 +380,13 @@ Configuraciones para dired
   ;; (add-hook 'dired-mode-hook
   ;;      'all-the-icons-dired-mode)
 #+end_src
-** COMMENT Evil Mode
+** Evil Mode
 Como prerequisito, undo-fu
 #+begin_src emacs-lisp
   ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
   ;; system, providing more convenient undo/redo functionality.
   (use-package undo-fu
-    :straight t
+    :ensure t
     :commands (undo-fu-only-undo
                undo-fu-only-redo
                undo-fu-only-redo-all
@@ -251,7 +399,7 @@ Como prerequisito, undo-fu
   ;; The undo-fu-session package complements undo-fu by enabling the saving
   ;; and restoration of undo history across Emacs sessions, even after restarting.
   (use-package undo-fu-session
-    :straight t
+    :ensure t
     :commands undo-fu-session-global-mode
     :hook (after-init . undo-fu-session-global-mode))
 #+end_src
@@ -263,7 +411,7 @@ Agora sim
 
   ;; Vim emulation
   (use-package evil
-    :straight t
+    :ensure t
     :commands (evil-mode evil-define-key)
     :hook (after-init . evil-mode)
 
@@ -293,6 +441,8 @@ Agora sim
     (evil-want-C-h-delete t)
     ;; Enable C-u to delete back to indentation in insert state
     (evil-want-C-u-delete t)
+    ;; Enable C-u to scroll back in normal mode
+    (evil-want-C-u-scroll t)
     ;; Enable fine-grained undo behavior
     (evil-want-fine-undo t)
     ;; Allow moving cursor beyond end-of-line in visual block mode
@@ -302,18 +452,12 @@ Agora sim
     ;; Whether Y yanks to the end of the line
     (evil-want-Y-yank-to-eol t))
 
-  (use-package evil-collection
-    :after evil
-    :straight t
-    :init
-    ;; It has to be defined before evil-colllection
-    (setq evil-collection-setup-minibuffer t)
-    :config
-    (evil-collection-init))
-
-  ;; Give Emacs tab-bar a style similar to Vim's
-  (use-package vim-tab-bar
-    :straight t
-    :commands vim-tab-bar-mode
-    :hook (after-init . vim-tab-bar-mode))
+  ;; (use-package evil-collection
+  ;;   :after evil
+  ;;   :ensure t
+  ;;   :init
+  ;;   ;; It has to be defined before evil-colllection
+  ;;   (setq evil-collection-setup-minibuffer t)
+  ;;   :config
+  ;;   (evil-collection-init))
 #+end_src
