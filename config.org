@@ -1,0 +1,319 @@
+#+TITLE: GNU Emacs (config files)
+#+AUTHOR: Maximiliano Christener
+#+STARTUP: overview
+#+OPTIONS: toc:2
+
+* Intro
+** Instalación
+Una vez hecha la instación de GNU Emacs (vanilla), se verifican
+dependencias necesarias: =cmake=, =libvterm=, =hunspell= y =hunspell-es_ar=.
+Luego, crear las carpetas =autosaves= y =backups=. 
+
+Para que todo funcione, primero debemos crear un =early-init.el= para
+incluir =(setq package-enable-at-startup nil)= en el inicio. Luego, hay que
+cargar los modulos de esta carpeta con el siguiente =init.el=
+
+
+Ya podemos iniciar Emacs por primera vez. Tras hacerlo, correr =M-x
+all-the-icons-install-fonts= y, en shell, =fc-cache -fv=.
+
+** Algunas características
+
+- =C-c C-r m= activa el modo oscuro en PDFs.
+- =org-tree-slide= para hacer presentaciones con Org Mode.
+
+** Sobre Org Mode
+
+Los modos son
+- =C-c C-x a= para archivar
+- =C-c TAB= para abrir el árbol
+- =C-c o= para ir a un lugar determinado
+  desde la toc.
+
+*** Expansions in Org-Tempo
+
+Org-tempo agrega un snippet para escribir bloques en Org. A saber,
+
+| Typing the below + TAB | Expands to ...                          |
+|------------------------+-----------------------------------------|
+| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
+| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
+| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
+| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
+| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
+| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
+| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
+| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
+| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
+| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
+
+
+* Config
+
+** General confs
+#+begin_src emacs-lisp
+(load-theme 'modus-vivendi)
+;; When Delete Selection mode is enabled, typed text replaces the selection
+;; if the selection is active.
+(delete-selection-mode 1)
+
+;; Display the current line and column numbers in the mode line
+(setq line-number-mode t)
+(setq column-number-mode t)
+(setq mode-line-position-column-line-format '("%l:%C"))
+
+;; Display of line numbers in the buffer:
+(setq-default display-line-numbers-type 'relative)
+(dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+  (add-hook hook #'display-line-numbers-mode))
+#+end_src
+
+** Org Mode
+Emacs todavía existe gracias a Org Mode. Una lástima que no se haya
+convertido en un estándar como Markdown
+#+BEGIN_SRC emacs-lisp
+  ;; Para usar extensiones (<a <s etc)
+  (require 'org-tempo)
+
+  ;;; Bullets
+  (use-package org-bullets
+    :straight t)
+  (add-hook 'org-mode-hook
+  	  (lambda () (org-bullets-mode 1)))
+
+  ;;; Appearance
+  ;; (add-hook 'org-mode-hook 'variable-pitch-mode)
+  ;; (custom-theme-set-faces
+  ;;  'user
+  ;;  '(variable-pitch ((t (:family "SauceCodePro NF" :height 180))))
+  ;;  '(fixed-pitch ((t (:family "SauceCodePro NF" :height 160)))))
+  ;; colores
+  ;; (setq org
+  ;;       -format-latex-options (plist-put org-format-latex-options :scale 2.4)
+  ;;       org-hide-emphasis-markers t
+  ;;       header-line-format nil
+  ;;       org-emphasis-alist
+  ;;        '(("*" (bold :foreground "Orange"))
+  ;;         ("/" (italic :foreground "Green"))
+  ;;         ("_" underline)
+  ;;         ("=" (:background "maroon" :foreground "white"))
+  ;;         ("~" (:background "deep sky blue" :foreground "MidnightBlue"))
+  ;;         ("+" (:strike-through t))))
+  ;; ;; pure lisp magic :D
+  ;; (dolist (face '((org-level-1 . 1.2)
+  ;;                 (org-level-2 . 1.1)
+  ;;                 (org-level-3 . 1.05)
+  ;;                 (org-level-4 . 1.0)
+  ;;                 (org-level-5 . 1.1)
+  ;;                 (org-level-6 . 1.1)
+  ;;                 (org-level-7 . 1.1)
+  ;;                 (org-level-8 . 1.1)))
+  ;;   (set-face-attribute (car face) nil
+  ;;                       :font "SauceCodePro NF"
+  ;;                       :weight 'medium
+  ;;                       :height (cdr face))) 
+
+  ;;; TOC
+  ;; (use-package toc-org
+  ;;   :straight t
+  ;;   :commands toc-org-enable)
+  ;; (add-hook 'org-mode-hook 'toc-org-enable)
+
+  ;; org indent
+  ;; (add-hook 'org-mode-hook 'org-indent-mode)
+
+  ;;; Presentations
+  ;; (use-package org-tree-slide
+  ;;   :straight t :custom (org-image-actual-width nil))
+  ;; (add-hook 'org-tree-slide-mode-hook (lambda () (display-line-numbers-mode 0)))
+  ;; ;;(setq-default header-line-format " ")
+  ;; ;; Para ver en html
+  ;; (use-package ox-reveal
+  ;;   :straight t)
+#+END_SRC
+
+** Completion: Company mode
+#+begin_src emacs-lisp
+;;; company-mode
+(use-package company
+ :straight t
+ :config (add-hook 'after-init-hook 'global-company-mode))
+(setq company-idle-delay 0.15)
+#+end_src
+
+** Tree-sitter Integration
+
+Tree-sitter is an incremental parsing system introduced in Emacs 29 that
+provides precise, high-performance syntax analysis and highlighting by
+constructing concrete syntax trees from source code. It supports a broad set of
+programming languages, including Bash, C, C++, C#, CMake, CSS, Dockerfile, Go,
+Java, JavaScript, JSON, Python, Rust, TOML, TypeScript, YAML, Elisp, Lua,
+Markdown, and many others. Unlike traditional font-lock, which relies on regular
+expressions, Tree-sitter uses formal grammar definitions to build real-time
+parse trees, enabling accurate syntax highlighting, structural navigation, code
+folding, and foundational support for advanced editing features like
+refactoring.
+
+The configuration below enables Tree-sitter support using the treesit-auto
+package. Setting treesit-auto-add-to-auto-mode-alist to 'all ensures that all
+available Tree-sitter modes are automatically activated for their corresponding
+file types. Enabling global-treesit-auto-mode applies this behavior globally,
+improving syntax accuracy and consistency across supported languages.
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  :straight t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+#+end_src
+
+** COMMENT Native compilation
+#+begin_src emacs-lisp
+;; Native compilation enhances Emacs performance by converting Elisp code into
+;; native machine code, resulting in faster execution and improved
+;; responsiveness.
+;;
+;; Ensure adding the following compile-angel code at the very beginning
+;; of your `~/.emacs.d/post-init.el` file, before all other packages.
+(use-package compile-angel
+  :demand t
+  :straight t
+  :custom
+  ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
+  ;; Drawback: The minibuffer will not display compile-angel's actions.
+  (compile-angel-verbose t)
+
+  :config
+  ;; The following directive prevents compile-angel from compiling your init
+  ;; files. If you choose to remove this push to `compile-angel-excluded-files'
+  ;; and compile your pre/post-init files, ensure you understand the
+  ;; implications and thoroughly test your code. For example, if you're using
+  ;; the `use-package' macro, you'll need to explicitly add:
+  ;; (eval-when-compile (require 'use-package))
+  ;; at the top of your init file.
+  (push "/init.el" compile-angel-excluded-files)
+  (push "/early-init.el" compile-angel-excluded-files)
+  (push "/pre-init.el" compile-angel-excluded-files)
+  (push "/post-init.el" compile-angel-excluded-files)
+  (push "/pre-early-init.el" compile-angel-excluded-files)
+  (push "/post-early-init.el" compile-angel-excluded-files)
+
+  ;; A local mode that compiles .el files whenever the user saves them.
+  ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
+
+  ;; A global mode that compiles .el files prior to loading them via `load' or
+  ;; `require'. Additionally, it compiles all packages that were loaded before
+  ;; the mode `compile-angel-on-load-mode' was activated.
+  (compile-angel-on-load-mode 1))
+#+end_src
+** Dired
+Configuraciones para dired
+#+begin_src emacs-lisp
+  ;;; Dired
+  (with-eval-after-load 'dired
+    (require 'dired-x)
+      ;; Set dired-x global variables here. For example: (setq dired-x-hands-off-my-keys nil)
+      )
+
+  (setq dired-listing-switches
+  	      "-lta --dired --group-directories-first -h -G" ;; lt es ordenado por tiempo
+  	      dired-dwim-target t
+  	      dired-guess-shell-alist-user
+  	      '(("\\.\\(png\\|jpe?g\\|tiff\\)" "sxiv" "xdg-open") ; abrir con ! o &
+              ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
+  		(".pdf" "rifle")
+  		(".*" "xdg-open"))
+  	      dired-omit-files "^\\."
+  	      dired-kill-when-opening-new-dired-buffer t)
+  (add-hook 'dired-mode-hook
+  	  'dired-omit-mode)
+  ;; (add-hook 'dired-mode-hook
+  ;;      'all-the-icons-dired-mode)
+#+end_src
+** COMMENT Evil Mode
+Como prerequisito, undo-fu
+#+begin_src emacs-lisp
+  ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
+  ;; system, providing more convenient undo/redo functionality.
+  (use-package undo-fu
+    :straight t
+    :commands (undo-fu-only-undo
+               undo-fu-only-redo
+               undo-fu-only-redo-all
+               undo-fu-disable-checkpoint)
+    :config
+    (global-unset-key (kbd "C-z"))
+    (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+    (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+
+  ;; The undo-fu-session package complements undo-fu by enabling the saving
+  ;; and restoration of undo history across Emacs sessions, even after restarting.
+  (use-package undo-fu-session
+    :straight t
+    :commands undo-fu-session-global-mode
+    :hook (after-init . undo-fu-session-global-mode))
+#+end_src
+
+Agora sim
+#+begin_src emacs-lisp
+  (setq evil-default-state 'emacs)
+  (setq evil-undo-system 'undo-fu)
+
+  ;; Vim emulation
+  (use-package evil
+    :straight t
+    :commands (evil-mode evil-define-key)
+    :hook (after-init . evil-mode)
+
+    :init
+    ;; It has to be defined before evil
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+
+    :custom
+    ;; Make :s in visual mode operate only on the actual visual selection
+    ;; (character or block), instead of the full lines covered by the selection
+    (evil-ex-visual-char-range t)
+    ;; Use Vim-style regular expressions in search and substitute commands,
+    ;; allowing features like \v (very magic), \zs, and \ze for precise matches
+    (evil-ex-search-vim-style-regexp t)
+    ;; Enable automatic horizontal split below
+    (evil-split-window-below t)
+    ;; Enable automatic vertical split to the right
+    (evil-vsplit-window-right t)
+    ;; Disable echoing Evil state to avoid replacing eldoc
+    (evil-echo-state nil)
+    ;; Do not move cursor back when exiting insert state
+    (evil-move-cursor-back nil)
+    ;; Make `v$` exclude the final newline
+    (evil-v$-excludes-newline t)
+    ;; Allow C-h to delete in insert state
+    (evil-want-C-h-delete t)
+    ;; Enable C-u to delete back to indentation in insert state
+    (evil-want-C-u-delete t)
+    ;; Enable fine-grained undo behavior
+    (evil-want-fine-undo t)
+    ;; Allow moving cursor beyond end-of-line in visual block mode
+    (evil-move-beyond-eol t)
+    ;; Disable wrapping of search around buffer
+    (evil-search-wrap nil)
+    ;; Whether Y yanks to the end of the line
+    (evil-want-Y-yank-to-eol t))
+
+  (use-package evil-collection
+    :after evil
+    :straight t
+    :init
+    ;; It has to be defined before evil-colllection
+    (setq evil-collection-setup-minibuffer t)
+    :config
+    (evil-collection-init))
+
+  ;; Give Emacs tab-bar a style similar to Vim's
+  (use-package vim-tab-bar
+    :straight t
+    :commands vim-tab-bar-mode
+    :hook (after-init . vim-tab-bar-mode))
+#+end_src
