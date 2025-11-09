@@ -1,6 +1,5 @@
 #+TITLE: GNU Emacs (config files)
 #+AUTHOR: Maximiliano Christener
-#+STARTUP: overview
 #+OPTIONS: toc:2
 
 * Índice :TOC:
@@ -9,6 +8,8 @@
 - [[#config][Config]]
   - [[#general-confs][General confs]]
   - [[#python][Python]]
+  - [[#latex][Latex]]
+  - [[#dashboard][Dashboard]]
   - [[#magit][Magit]]
   - [[#keybindings][Keybindings]]
   - [[#terminal][Terminal]]
@@ -17,6 +18,7 @@
   - [[#completion-company-mode][Completion: Company mode]]
   - [[#tree-sitter-integration][Tree-sitter Integration]]
   - [[#dired][Dired]]
+  - [[#icons][Icons]]
   - [[#evil-mode][Evil Mode]]
 
 * Intro
@@ -45,15 +47,22 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
 | <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
 | <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
 
-
 * Config
 
 ** General confs
 #+begin_src emacs-lisp
   (load-theme 'modus-vivendi)
+  ;;(set-face-attribute 'default nil :height 125) ;; default zoom
+    (add-to-list 'default-frame-alist
+               '(font . "UbuntuMono Nerd Font-14"))
+
   ;; When Delete Selection mode is enabled, typed text replaces the selection
   ;; if the selection is active.
   (delete-selection-mode 1)
+
+  ;; auth-source never saves
+  (setq auth-source-save-behavior nil)
+
   ;; Display the current line and column numbers in the mode line
   (setq line-number-mode t)
   (setq column-number-mode t)
@@ -63,8 +72,24 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
   (setq-default display-line-numbers-type 'relative)
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook #'display-line-numbers-mode))
+#+end_src
 
-  ;; packages
+*** Emojis
+#+begin_src emacs-lisp
+  (use-package emojify
+    :ensure t
+    :hook (after-init . global-emojify-mode))
+#+end_src
+*** Delight
+Delight es un paquete que esconde minor-modes del mode line. When delight is
+installed, you can use the :delight keyword. If the mode name doesn’t match the
+package name with ‘-mode’ appended, provide a symbol instead.
+#+begin_src emacs-lisp
+  (use-package delight
+    :ensure t)
+#+end_src
+*** Packages
+#+begin_src emacs-lisp
   (setq package-pinned-packages
       '((annalist                      . "melpa-stable")
         (ansible-doc                   . "melpa-stable")
@@ -150,6 +175,69 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
     :hook (python-mode . uv-mode-auto-activate-hook))
   (add-hook 'python-mode-hook #'electric-pair-mode)
 #+end_src
+** Latex
+#+begin_src emacs-lisp
+  (use-package auctex
+    :ensure t
+    :defer t
+    :mode ("\\.tex\\'" . latex-mode)
+    :init
+    (setq TeX-auto-save t
+          Tex-parse-self t
+          TeX-newline-function 'reindent-then-newline-and-indent)
+    :config
+    (setq TeX-view-program-selection '((output-dvi "Zathura")
+                                       (output-pdf "Zathura")))
+    (setq TeX-source-correlate-mode t))
+
+
+
+#+end_src
+** Dashboard
+#+begin_src emacs-lisp
+    (use-package dashboard
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook))
+    (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
+
+    ;; Set the title
+  (setq dashboard-banner-logo-title "Welcome to GNU Emacs")
+  ;; Set the banner
+  (setq dashboard-startup-banner 'official)
+  ;; Value can be:
+  ;;  - 'official which displays the official emacs logo.
+  ;;  - 'logo which displays an alternative emacs logo.
+  ;;  - an integer which displays one of the text banners
+  ;;    (see dashboard-banners-directory files).
+  ;;  - a string that specifies a path for a custom banner
+  ;;    currently supported types are gif/image/text/xbm.
+  ;;  - a cons of 2 strings which specifies the path of an image to use
+  ;;    and other path of a text file to use if image isn't supported.
+  ;;    (cons "path/to/image/file/image.png" "path/to/text/file/text.txt").
+  ;;  - a list that can display an random banner,
+  ;;    supported values are: string (filepath), 'official, 'logo and integers.
+
+  ;; Content is not centered by default. To center, set
+  (setq dashboard-center-content t)
+  ;; vertically center content
+  (setq dashboard-vertically-center-content t)
+
+  ;; dashboard items
+  (setq dashboard-items '(
+                            (recents   . 5)
+                            ;;(bookmarks . 5)
+                            (projects  . 5)
+                            (agenda    . 5)))
+
+  ;; nerd-fonts
+  (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
+  (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+
+  ;; icons
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+#+end_src
 ** Magit
 #+begin_src emacs-lisp
   (use-package magit
@@ -160,7 +248,7 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
 #+begin_src emacs-lisp
 ;; e.g. (keymap-set c-mode-map "C-S-l" 'function-name)
 (keymap-global-set "C-x C-a" #'auto-fill-mode)
-(keymap-global-set "C-x v t" #'vterm)
+(keymap-global-set "C-x v t" #'vterm-other-window)
 #+end_src
 
 ** Terminal
@@ -277,7 +365,7 @@ convertido en un estándar como Markdown
   (use-package company
    :ensure t
    :config (add-hook 'after-init-hook 'global-company-mode)
-  (setq company-idle-delay 0)
+  (setq company-idle-delay 0.01)
   (setq company-minimum-prefix-length 2)
   (setq company-show-numbers t)
   ;; To prevent default down-casing.
@@ -377,14 +465,74 @@ Configuraciones para dired
   	      dired-kill-when-opening-new-dired-buffer t)
   (add-hook 'dired-mode-hook
   	  'dired-omit-mode)
-  ;; (add-hook 'dired-mode-hook
-  ;;      'all-the-icons-dired-mode)
+#+end_src
+** Icons
+#+begin_src emacs-lisp
+  ;; ;;; all-the-icons
+  ;; (use-package all-the-icons
+  ;;   :if (display-graphic-p)
+  ;;   :ensure t)
+  ;; 
+  ;; (use-package all-the-icons-dired
+  ;;   :ensure t
+  ;;   :if (display-graphic-p)
+  ;;   :config (setq all-the-icons-dired-monochrome nil))
+  ;;   (add-hook 'dired-mode-hook
+  ;;         #'all-the-icons-dired-mode))
+  ;; 
+  (use-package nerd-icons
+    :ensure t
+    ;; :custom
+    ;; The Nerd Font you want to use in GUI
+    ;; "Symbols Nerd Font Mono" is the default and is recommended
+    ;; but you can use any other Nerd Font if you want
+    ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+    )
+
+  ;; nerd-icons
+  (use-package nerd-icons-completion
+    :ensure t
+    :after marginalia
+    :config
+    (nerd-icons-completion-mode))
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+
+  ;; dired
+  (use-package nerd-icons-dired
+    :ensure t
+    :delight
+    :hook
+    (dired-mode . nerd-icons-dired-mode))
+
+  ;; ibuffer
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+  (use-package nerd-icons-ibuffer
+    :ensure t
+    :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+  ;; Whether display the icons.
+  (setq nerd-icons-ibuffer-icon t)
+
+  ;; Whether display the colorful icons.
+  ;; It respects `nerd-icons-color-icons'.
+  (setq nerd-icons-ibuffer-color-icon t)
+
+  ;; The default icon size in ibuffer.
+  (setq nerd-icons-ibuffer-icon-size 1.0)
+
+  ;; Use human readable file size in ibuffer.
+  (setq  nerd-icons-ibuffer-human-readable-size t)
+
+  ;; Slow Rendering
+  ;; If you experience a slow down in performance when rendering multiple icons simultaneously,
+  ;; you can try setting the following variable
+  (setq inhibit-compacting-font-caches t)
 #+end_src
 ** Evil Mode
 Como prerequisito, undo-fu
 #+begin_src emacs-lisp
-  ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
-  ;; system, providing more convenient undo/redo functionality.
+  ;; ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
+  ;; ;; system, providing more convenient undo/redo functionality.
   (use-package undo-fu
     :ensure t
     :commands (undo-fu-only-undo
@@ -397,18 +545,15 @@ Como prerequisito, undo-fu
     (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
 
   ;; The undo-fu-session package complements undo-fu by enabling the saving
-  ;; and restoration of undo history across Emacs sessions, even after restarting.
-  (use-package undo-fu-session
-    :ensure t
-    :commands undo-fu-session-global-mode
-    :hook (after-init . undo-fu-session-global-mode))
+  ;; ;; and restoration of undo history across Emacs sessions, even after restarting.
+  ;; (use-package undo-fu-session
+  ;;   :ensure t
+  ;;   :commands undo-fu-session-global-mode
+  ;;   :hook (after-init . undo-fu-session-global-mode))
 #+end_src
 
 Agora sim
 #+begin_src emacs-lisp
-  (setq evil-default-state 'emacs)
-  (setq evil-undo-system 'undo-fu)
-
   ;; Vim emulation
   (use-package evil
     :ensure t
@@ -417,8 +562,10 @@ Agora sim
 
     :init
     ;; It has to be defined before evil
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
+    (setq evil-want-integration t
+          evil-want-keybinding nil
+          evil-default-state 'emacs
+          evil-undo-system 'undo-fu)
 
     :custom
     ;; Make :s in visual mode operate only on the actual visual selection
@@ -452,12 +599,21 @@ Agora sim
     ;; Whether Y yanks to the end of the line
     (evil-want-Y-yank-to-eol t))
 
-  ;; (use-package evil-collection
-  ;;   :after evil
-  ;;   :ensure t
-  ;;   :init
-  ;;   ;; It has to be defined before evil-colllection
-  ;;   (setq evil-collection-setup-minibuffer t)
-  ;;   :config
-  ;;   (evil-collection-init))
+  (use-package evil-collection
+    ;; :delight evil-collection-unimpaired-mode 
+    :after evil
+    :ensure t
+    :init
+    ;; It has to be defined before evil-colllection
+    (setq evil-collection-setup-minibuffer t)
+    (setq evil-collection-want-unimpaired-p nil)
+    :config
+    (evil-collection-init))
+
+  (use-package evil-escape
+    :delight
+    :ensure t
+    :config
+    (setq evil-escape-key-sequence "jk")
+    (evil-escape-mode 1))
 #+end_src
