@@ -408,7 +408,6 @@ improving syntax accuracy and consistency across supported languages.
   ;; completions
   (use-package nerd-icons-completion
     :ensure t
-    :if (display-graphic-p)
     :after (marginalia nerd-icons)
     :config
     (nerd-icons-completion-mode)
@@ -417,7 +416,6 @@ improving syntax accuracy and consistency across supported languages.
   ;; dired
   (use-package nerd-icons-dired
     :ensure t
-    :if (display-graphic-p)
     :after nerd-icons
     :delight
     :hook
@@ -426,7 +424,6 @@ improving syntax accuracy and consistency across supported languages.
   ;; ibuffer
   (use-package nerd-icons-ibuffer
     :ensure t
-    :if (display-graphic-p)
     :after nerd-icons
     :bind ("C-x C-b" . ibuffer)
     :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
