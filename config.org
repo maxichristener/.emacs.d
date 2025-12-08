@@ -56,7 +56,6 @@ Algunos tips útiles para la navegación:
     
     :bind
     ("C-x C-a" . auto-fill-mode)
-    ("C-x v t" . vterm-other-window)
     ("C-x M-x" . open-config-file)
     )
 #+end_src
@@ -156,6 +155,8 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
   (use-package vterm
     :ensure t
     :defer t
+    :bind
+    ("C-x v t" . vterm-other-window)
     :custom
     (vterm-shell "/bin/zsh"))
 
