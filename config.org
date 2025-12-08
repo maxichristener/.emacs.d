@@ -192,7 +192,9 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
     ;; Marginalia must be activated in the :init section of use-package such that
     ;; the mode gets enabled right away. Note that this forces loading the
     ;; package.
-    (marginalia-mode))
+    (marginalia-mode)
+    :hook
+    (marginalia-mode . nerd-icons-completion-marginalia-setup))
 #+end_src
 
 * Org Mode
@@ -403,31 +405,27 @@ improving syntax accuracy and consistency across supported languages.
     ;; Slow Rendering
     ;; If you experience a slow down in performance when rendering multiple icons simultaneously,
     ;; you can try setting the following variable
-    (inhibit-compacting-font-caches t)
-    )
-
-  ;; completions
-  (use-package nerd-icons-completion
-    :ensure t
-    :after (marginalia nerd-icons)
+    ;;(inhibit-compacting-font-caches t)
     :config
-    (nerd-icons-completion-mode)
-    :hook (marginalia-mode nerd-icons-completion-marginalia-setup))
+    
+    ;; completions
+    (use-package nerd-icons-completion
+      :after marginalia
+      :config
+      (nerd-icons-completion-mode))
 
-  ;; dired
-  (use-package nerd-icons-dired
-    :ensure t
-    :after nerd-icons
-    :delight
-    :hook
-    (dired-mode . nerd-icons-dired-mode))
-
-  ;; ibuffer
-  (use-package nerd-icons-ibuffer
-    :ensure t
-    :after nerd-icons
-    :bind ("C-x C-b" . ibuffer)
-    :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+    ;; dired
+    (use-package nerd-icons-dired
+      :ensure t
+      :delight
+      :hook
+      (dired-mode . nerd-icons-dired-mode))
+    
+    ;; ibuffer
+    (use-package nerd-icons-ibuffer
+      :ensure t
+      :bind ("C-x C-b" . ibuffer)
+      :hook (ibuffer-mode . nerd-icons-ibuffer-mode)))
 #+end_src
 
 * Evil
