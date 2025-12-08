@@ -1,86 +1,67 @@
 #+TITLE: GNU Emacs (config files)
 #+AUTHOR: Maximiliano Christener
-#+OPTIONS: toc:2
 
 * Índice :TOC:
-- [[#intro][Intro]]
-  - [[#sobre-org-mode][Sobre Org Mode]]
-- [[#config][Config]]
-  - [[#general-confs][General confs]]
-  - [[#python][Python]]
-  - [[#latex][Latex]]
-  - [[#dashboard][Dashboard]]
-  - [[#magit][Magit]]
-  - [[#keybindings][Keybindings]]
-  - [[#terminal][Terminal]]
-  - [[#marginalia][Marginalia]]
-  - [[#org-mode][Org Mode]]
-  - [[#completion-company-mode][Completion: Company mode]]
-  - [[#tree-sitter-integration][Tree-sitter Integration]]
-  - [[#dired][Dired]]
-  - [[#icons][Icons]]
-  - [[#evil-mode][Evil Mode]]
+- [[#emacs][Emacs]]
+- [[#delight][Delight]]
+- [[#python][Python]]
+- [[#latex][LaTeX]]
+- [[#dashboard][Dashboard]]
+- [[#magit][Magit]]
+- [[#terminal][Terminal]]
+- [[#marginalia][Marginalia]]
+- [[#org-mode][Org Mode]]
+  - [[#expansions-in-org-tempo][Expansions in Org-Tempo]]
+- [[#markdown][Markdown]]
+- [[#company-mode-completion][Company mode (completion)]]
+- [[#tree-sitter-integration][Tree-sitter Integration]]
+- [[#dired][Dired]]
+- [[#icons][Icons]]
+- [[#evil][Evil]]
+- [[#darkroom][darkroom]]
+- [[#denote][denote]]
+- [[#windmove][windmove]]
 
-* Intro
-** Sobre Org Mode
+* Emacs
+Algunos tips útiles para la navegación:
+- =C-c C-x a= para archivar (org-toggle-archive-tag)
+- =C-c TAB= para abrir el árbol (org-ctrl-c-tab)
+- =C-c C-o= (org-open-at-point)
 
-Los modos son
-- =C-c C-x a= para archivar
-- =C-c TAB= para abrir el árbol
-- =C-c o= para ir a un lugar determinado
-  desde la toc.
-
-*** Expansions in Org-Tempo
-
-Org-tempo agrega un snippet para escribir bloques en Org. A saber,
-
-| Typing the below + TAB | Expands to ...                          |
-|------------------------+-----------------------------------------|
-| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
-| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
-| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
-| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
-| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
-| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
-| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
-| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
-| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
-| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
-
-* Config
-
-** General confs
 #+begin_src emacs-lisp
-  (load-theme 'modus-vivendi)
-  ;;(set-face-attribute 'default nil :height 125) ;; default zoom
-    (add-to-list 'default-frame-alist
-               '(font . "UbuntuMono Nerd Font-14"))
+  (defvar default-emacs-font "JetBrainsMono NF 14"
+    "The main font used by Emacs")
 
-  ;; When Delete Selection mode is enabled, typed text replaces the selection
-  ;; if the selection is active.
-  (delete-selection-mode 1)
+  (use-package emacs
+    :config
+    (load-theme 'modus-vivendi t)
+    (delete-selection-mode 1)
+    (electric-pair-mode 1)
+    (add-to-list 'default-frame-alist `(font . ,default-emacs-font))
+    ;; (set-face-attribute 'default nil :height 125) ;; default zoom
 
-  ;; auth-source never saves
-  (setq auth-source-save-behavior nil)
+    ;; functions
+    (defun open-config-file ()
+      "Opens config.org"
+      (interactive)
+      (progn 
+        (find-file (expand-file-name "config.org" user-emacs-directory))
+        (message "Displaying config.org")))
 
-  ;; Display the current line and column numbers in the mode line
-  (setq line-number-mode t)
-  (setq column-number-mode t)
-  (setq mode-line-position-column-line-format '("%l:%C"))
-
-  ;; Display of line numbers in the buffer:
-  (setq-default display-line-numbers-type 'relative)
-  (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
-    (add-hook hook #'display-line-numbers-mode))
+    :custom
+    (auth-source-save-behavior nil) ; auth-source never saves
+    (line-number-mode t)
+    (column-number-mode t)
+    (mode-line-position-column-line-format '("%l:%C"))
+    
+    :bind
+    ("C-x C-a" . auto-fill-mode)
+    ("C-x v t" . vterm-other-window)
+    ("C-x M-x" . open-config-file)
+    )
 #+end_src
 
-*** Emojis
-#+begin_src emacs-lisp
-  (use-package emojify
-    :ensure t
-    :hook (after-init . global-emojify-mode))
-#+end_src
-*** Delight
+* Delight
 Delight es un paquete que esconde minor-modes del mode line. When delight is
 installed, you can use the :delight keyword. If the mode name doesn’t match the
 package name with ‘-mode’ appended, provide a symbol instead.
@@ -88,197 +69,115 @@ package name with ‘-mode’ appended, provide a symbol instead.
   (use-package delight
     :ensure t)
 #+end_src
-*** Packages
-#+begin_src emacs-lisp
-  (setq package-pinned-packages
-      '((annalist                      . "melpa-stable")
-        (ansible-doc                   . "melpa-stable")
-        (apheleia                      . "melpa-stable")
-        (basic-mode                    . "melpa-stable")
-        (consult-dir                   . "melpa-stable")
-        (corfu-prescient               . "melpa-stable")
-        (dtrt-indent                   . "melpa-stable")
-        (dumb-jump                     . "melpa-stable")
-        (elisp-refs                    . "melpa-stable")
-        (evil-collection               . "melpa-stable")
-        (f                             . "melpa-stable")
-        (flymake-quickdef              . "melpa-stable")
-        (groovy-mode                   . "melpa-stable")
-        (highlight-defined             . "melpa-stable")
-        (markdown-toc                  . "melpa-stable")
-        (org-appear                    . "melpa-stable")
-        (package-lint-flymake          . "melpa-stable")
-        (parent-mode                   . "melpa-stable")
-        (php-mode                      . "melpa-stable")
-        (prescient                     . "melpa-stable")
-        (s                             . "melpa-stable")
-        (tocus                         . "melpa-stable")
-        (treesit-auto                  . "melpa-stable")
-        (vertico-prescient             . "melpa-stable")
-        (visual-fill-column            . "melpa-stable")
-        (yasnippet-snippets            . "melpa-stable")
-        (ace-window                    . "gnu")
-        (aggressive-indent             . "gnu")
-        (avy                           . "gnu")
-        (cape                          . "gnu")
-        (compat                        . "gnu")
-        (consult                       . "gnu")
-        (corfu                         . "gnu")
-        (csv-mode                      . "gnu")
-        (dash                          . "gnu")
-        (diff-hl                       . "gnu")
-        (diminish                      . "gnu")
-        (easy-escape                   . "gnu")
-        (embark                        . "gnu")
-        (embark-consult                . "gnu")
-        (expand-region                 . "gnu")
-        (gcmh                          . "gnu")
-        (indent-bars                   . "gnu")
-        (marginalia                    . "gnu")
-        (modus-themes                  . "gnu")
-        (orderless                     . "gnu")
-        (org                           . "gnu")
-        (rainbow-mode                  . "gnu")
-        (transient                     . "gnu")
-        (vertico                       . "gnu")
-        (yasnippet                     . "gnu")
-        (ztree                         . "gnu")
-        (eat                           . "nongnu")
-        (edit-indirect                 . "nongnu")
-        (evil-visualstar               . "nongnu")
-        (exec-path-from-shell          . "nongnu")
-        (git-modes                     . "nongnu")
-        (golden-ratio                  . "nongnu")
-        (goto-chg                      . "nongnu")
-        (gptel                         . "nongnu")
-        (lua-mode                      . "nongnu")
-        (magit                         . "nongnu")
-        (markdown-mode                 . "nongnu")
-        (package-lint                  . "nongnu")
-        (page-break-lines              . "nongnu")
-        (paredit                       . "nongnu")
-        (popup                         . "nongnu")
-        (rainbow-delimiters            . "nongnu")
-        (undo-fu                       . "nongnu")
-        (undo-fu-session               . "nongnu")
-        (wgrep                         . "nongnu")
-        (with-editor                   . "nongnu")
-        (ws-butler                     . "nongnu")
-        (yaml-mode                     . "nongnu")))
-#+end_src
 
-** Python
+* Python
 #+begin_src emacs-lisp
-  ;; python
   (use-package uv-mode
     :ensure t
     :hook (python-mode . uv-mode-auto-activate-hook))
-  (add-hook 'python-mode-hook #'electric-pair-mode)
 #+end_src
-** Latex
+
+* LaTeX
+Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
+=TeX-tex-mode= (el major mode de =auctex=).
 #+begin_src emacs-lisp
   (use-package auctex
     :ensure t
-    :defer t
     :mode ("\\.tex\\'" . latex-mode)
-    :init
-    (setq TeX-auto-save t
-          Tex-parse-self t
-          TeX-newline-function 'reindent-then-newline-and-indent)
-    :config
-    (setq TeX-view-program-selection '((output-dvi "Zathura")
-                                       (output-pdf "Zathura")))
-    (setq TeX-source-correlate-mode t))
-
-
-
+    :custom
+    (TeX-auto-save t)
+    (Tex-parse-self t)
+    (TeX-newline-function 'reindent-then-newline-and-indent)
+    (TeX-view-program-selection '((output-dvi "Zathura")
+                                  (output-pdf "Zathura")))
+    (TeX-source-correlate-mode t)
+    :hook
+    (TeX-mode . eglot-ensure))
 #+end_src
-** Dashboard
+
+* Dashboard
 #+begin_src emacs-lisp
-    (use-package dashboard
-      :ensure t
-      :config
-      (dashboard-setup-startup-hook))
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
     (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
 
     ;; Set the title
-  (setq dashboard-banner-logo-title "Welcome to GNU Emacs")
-  ;; Set the banner
-  (setq dashboard-startup-banner 'official)
-  ;; Value can be:
-  ;;  - 'official which displays the official emacs logo.
-  ;;  - 'logo which displays an alternative emacs logo.
-  ;;  - an integer which displays one of the text banners
-  ;;    (see dashboard-banners-directory files).
-  ;;  - a string that specifies a path for a custom banner
-  ;;    currently supported types are gif/image/text/xbm.
-  ;;  - a cons of 2 strings which specifies the path of an image to use
-  ;;    and other path of a text file to use if image isn't supported.
-  ;;    (cons "path/to/image/file/image.png" "path/to/text/file/text.txt").
-  ;;  - a list that can display an random banner,
-  ;;    supported values are: string (filepath), 'official, 'logo and integers.
+    (setq dashboard-banner-logo-title "Welcome to GNU Emacs")
 
-  ;; Content is not centered by default. To center, set
-  (setq dashboard-center-content t)
-  ;; vertically center content
-  (setq dashboard-vertically-center-content t)
 
-  ;; dashboard items
-  (setq dashboard-items '(
-                            (recents   . 5)
-                            ;;(bookmarks . 5)
-                            (projects  . 5)
-                            (agenda    . 5)))
+    ;; Set the banner
+    (if (display-graphic-p)
+        (setq dashboard-startup-banner 'official) (setq dashboard-startup-banner 3))
+    ;; Value can be:
+    ;;  - 'official which displays the official emacs logo.
+    ;;  - 'logo which displays an alternative emacs logo.
+    ;;  - an integer which displays one of the text banners
+    ;;    (see dashboard-banners-directory files).
+    ;;  - a string that specifies a path for a custom banner
+    ;;    currently supported types are gif/image/text/xbm.
+    ;;  - a cons of 2 strings which specifies the path of an image to use
+    ;;    and other path of a text file to use if image isn't supported.
+    ;;    (cons "path/to/image/file/image.png" "path/to/text/file/text.txt").
+    ;;  - a list that can display an random banner,
+    ;;    supported values are: string (filepath), 'official, 'logo and integers.
 
-  ;; nerd-fonts
-  (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
-  (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+    ;; Content is not centered by default. To center, set
+    (setq dashboard-center-content t)
+    ;; vertically center content
+    (setq dashboard-vertically-center-content t)
 
-  ;; icons
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
+    ;; dashboard items
+    (setq dashboard-items '(
+                              (recents   . 5)
+                              (projects  . 5)
+                              (bookmarks    . 5)))
+
+    ;; nerd-fonts
+    ;;(setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
+    (setq dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+
+    ;; icons
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t))
 #+end_src
-** Magit
+
+* Magit
 #+begin_src emacs-lisp
   (use-package magit
-    :ensure t)
+    :ensure t
+    :defer t)
 #+end_src
 
-** Keybindings
-#+begin_src emacs-lisp
-;; e.g. (keymap-set c-mode-map "C-S-l" 'function-name)
-(keymap-global-set "C-x C-a" #'auto-fill-mode)
-(keymap-global-set "C-x v t" #'vterm-other-window)
-#+end_src
-
-** Terminal
+* Terminal
 #+begin_src emacs-lisp
   ;;; vterm
   (use-package vterm
     :ensure t
-    :init 
-    (setq vterm-shell "/bin/zsh"))
+    :defer t
+    :custom
+    (vterm-shell "/bin/zsh"))
 
   ;; eshell
   (use-package eshell-syntax-highlighting
     :ensure t
     :after esh-mode
     :config
-    (eshell-syntax-highlighting-global-mode +1))
-  ;; eshell-syntax-highlighting -- adds fish/zsh-like syntax highlighting.
-
-  ;; eshell-rc-script -- your profile for eshell; like a bashrc for eshell.
-  ;; eshell-aliases-file -- sets an aliases file for the eshell.
-  (setq ;;eshell-rc-script (concat user-emacs-directory "eshell/profile")
-   ;;eshell-aliases-file (concat user-emacs-directory "eshell/aliases")
-   eshell-history-size 5000
-   eshell-buffer-maximum-lines 5000
-   eshell-hist-ignoredups t
-   eshell-scroll-to-bottom-on-input t
-   eshell-destroy-buffer-when-process-dies t
-   eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+    (eshell-syntax-highlighting-global-mode +1) ; adds fish/zsh-like syntax highlighting
+    :custom
+    (eshell-history-size 5000)
+    (eshell-buffer-maximum-lines 5000)
+    (eshell-hist-ignoredups t)
+    (eshell-scroll-to-bottom-on-input t)
+    (eshell-destroy-buffer-when-process-dies t)
+    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+    ;;(eshell-rc-script (concat user-emacs-directory "eshell/profile")    ; your profile for eshell; like a bashrc for eshell.
+    ;;(eshell-aliases-file (concat user-emacs-directory "eshell/aliases") ; sets an aliases file for the eshell. 
+    )
 #+end_src
-** Marginalia
+
+* Marginalia
 #+begin_src emacs-lisp
   (use-package marginalia
     :ensure t
@@ -294,91 +193,147 @@ package name with ‘-mode’ appended, provide a symbol instead.
     ;; package.
     (marginalia-mode))
 #+end_src
-** Org Mode
+
+* Org Mode
 Emacs todavía existe gracias a Org Mode. Una lástima que no se haya
 convertido en un estándar como Markdown
+
+** Expansions in Org-Tempo
+Org-tempo agrega un snippet para escribir bloques en Org. A saber,
+
+| Typing the below + TAB | Expands to ...                          |
+|------------------------+-----------------------------------------|
+| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
+| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
+| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
+| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
+| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
+| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
+| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
+| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
+| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
+| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
+
 #+BEGIN_SRC emacs-lisp
-  ;; Para usar extensiones (<a <s etc)
-  (require 'org-tempo)
+  (use-package org
+    :hook (org-mode . (lambda () (electric-indent-local-mode -1)))
+    :custom
+    (require 'org-tempo)
+    (org-format-latex-options (plist-put org-format-latex-options :scale 2.4))
+    ;; (org-hide-emphasis-markers t)
+    (header-line-format nil)
+    (org-emphasis-alist
+     '(("*" (bold :foreground "LightSalmon1"))
+       ("/" (italic :foreground "SpringGreen"))
+       ("_" underline)
+       ("=" (:background "maroon" :foreground "white"))
+       ("~" (:background "deep sky blue" :foreground "MidnightBlue"))
+       ("+" (:strike-through t))))
+    :config
+    ;; pure lisp magic :D
+    (dolist (face '((org-level-1 . 1.2)
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil
+                          :font default-emacs-font
+                          :weight 'medium
+                          :height (cdr face))))
 
-  ;;; Bullets
+  ;; TOC
+  (use-package toc-org
+    :ensure t
+    :commands toc-org-enable
+    :hook (org-mode . toc-org-enable))
+
+  ;; Bullets
   (use-package org-bullets
-    :ensure t)
-  (add-hook 'org-mode-hook
-  	  (lambda () (org-bullets-mode 1)))
+    :ensure t
+    :hook org-mode)
 
-  ;;; Appearance
+  ;;; Presentations
+  ;; (use-package org-tree-slide
+  ;;   :ensure t
+  ;;   :custom
+  ;;   (org-image-actual-width nil)
+  ;;   (header-line-format " ")
+  ;;   :hook (org-tree-slide-mode . (lambda () (display-line-numbers-mode 0))))
+  ;; 
+  ;; ;; Para ver en html
+  ;; (use-package ox-reveal
+  ;;   :ensure t
+  ;;   :after org-tree-slide)
+
+  ;; ;;; OLD ;;; ;;
   ;; (add-hook 'org-mode-hook 'variable-pitch-mode)
   ;; (custom-theme-set-faces
   ;;  'user
   ;;  '(variable-pitch ((t (:family "SauceCodePro NF" :height 180))))
   ;;  '(fixed-pitch ((t (:family "SauceCodePro NF" :height 160)))))
-  ;; colores
-  ;; (setq org
-  ;;       -format-latex-options (plist-put org-format-latex-options :scale 2.4)
-  ;;       org-hide-emphasis-markers t
-  ;;       header-line-format nil
-  ;;       org-emphasis-alist
-  ;;        '(("*" (bold :foreground "Orange"))
-  ;;         ("/" (italic :foreground "Green"))
-  ;;         ("_" underline)
-  ;;         ("=" (:background "maroon" :foreground "white"))
-  ;;         ("~" (:background "deep sky blue" :foreground "MidnightBlue"))
-  ;;         ("+" (:strike-through t))))
-  ;; ;; pure lisp magic :D
-  ;; (dolist (face '((org-level-1 . 1.2)
-  ;;                 (org-level-2 . 1.1)
-  ;;                 (org-level-3 . 1.05)
-  ;;                 (org-level-4 . 1.0)
-  ;;                 (org-level-5 . 1.1)
-  ;;                 (org-level-6 . 1.1)
-  ;;                 (org-level-7 . 1.1)
-  ;;                 (org-level-8 . 1.1)))
-  ;;   (set-face-attribute (car face) nil
-  ;;                       :font "SauceCodePro NF"
-  ;;                       :weight 'medium
-  ;;                       :height (cdr face))) 
-
-  ;;; TOC
-  (use-package toc-org
-    :ensure t
-    :commands toc-org-enable)
-  (add-hook 'org-mode-hook 'toc-org-enable)
-
-
-  ;; org indent                         
+  ;;; org indent                         
   ;; (add-hook 'org-mode-hook 'org-indent-mode)
-
-  ;;; Presentations
-  ;; (use-package org-tree-slide
-  ;;   :ensure t :custom (org-image-actual-width nil))
-  ;; (add-hook 'org-tree-slide-mode-hook (lambda () (display-line-numbers-mode 0)))
-  ;; ;;(setq-default header-line-format " ")
-  ;; ;; Para ver en html
-  ;; (use-package ox-reveal
-  ;;   :ensure t)
 #+END_SRC
 
-** Completion: Company mode
+* Markdown
+/markdown-mode (this should be built-in into emacs...)/
+
+The markdown-mode package provides a major mode for Emacs for syntax
+highlighting, editing commands, and preview support for Markdown documents.
+It supports core Markdown syntax as well as extensions like GitHub Flavored
+Markdown (GFM).
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :defer t
+    :commands (gfm-mode
+               gfm-view-mode
+               markdown-mode
+               markdown-view-mode)
+    :mode (("\\.markdown\\'" . markdown-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("README\\.md\\'" . gfm-mode))
+    :bind
+    (:map markdown-mode-map
+          ("C-c C-e" . markdown-do)))
+
+  ;; TOC... why not?
+  ;; Automatically generate a table of contents when editing Markdown files
+  (use-package markdown-toc
+    :ensure t
+    :after markdown-mode
+    :commands (markdown-toc-generate-toc
+               markdown-toc-generate-or-refresh-toc
+               markdown-toc-delete-toc
+               markdown-toc--toc-already-present-p)
+    :custom
+    (markdown-toc-header-toc-title "**Table of Contents**"))
+#+end_src
+
+* Company mode (completion)
 #+begin_src emacs-lisp
   ;;; company-mode
   (use-package company
    :ensure t
-   :config (add-hook 'after-init-hook 'global-company-mode)
-  (setq company-idle-delay 0.01)
-  (setq company-minimum-prefix-length 2)
-  (setq company-show-numbers t)
+   :defer t
+   :custom
+   (company-idle-delay 0.01)
+   (company-minimum-prefix-length 2)
+   ;; (company-show-numbers t)
+   (company-dabbrev-downcase nil)
+   (company-dabbrev-ignore-case nil)
+   (company-dabbrev-code-ignore-case nil)
+  :hook
+  (python-mode org-mode TeX-mode lisp-mode)
+  )
   ;; To prevent default down-casing.
   ;; https://emacs.stackexchange.com/questions/10837/how-to-make-company-mode-be-case-sensitive-on-plain-text
-  (setq company-dabbrev-downcase nil)
-  (setq company-dabbrev-ignore-case nil)
-  (setq company-dabbrev-code-ignore-case nil))
-  ;; enable company everywhere
-  (add-hook 'after-init-hook 'global-company-mode)
 #+end_src
 
-** Tree-sitter Integration
-
+* Tree-sitter Integration
 Tree-sitter is an incremental parsing system introduced in Emacs 29 that
 provides precise, high-performance syntax analysis and highlighting by
 constructing concrete syntax trees from source code. It supports a broad set of
@@ -396,176 +351,101 @@ available Tree-sitter modes are automatically activated for their corresponding
 file types. Enabling global-treesit-auto-mode applies this behavior globally,
 improving syntax accuracy and consistency across supported languages.
 #+begin_src emacs-lisp
-(use-package treesit-auto
-  :ensure t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+  (use-package treesit-auto
+    :ensure t
+    :defer t
+    :custom
+    (treesit-auto-install 'prompt)
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode))
 #+end_src
 
-** COMMENT Native compilation
+* Dired
 #+begin_src emacs-lisp
-;; Native compilation enhances Emacs performance by converting Elisp code into
-;; native machine code, resulting in faster execution and improved
-;; responsiveness.
-;;
-;; Ensure adding the following compile-angel code at the very beginning
-;; of your `~/.emacs.d/post-init.el` file, before all other packages.
-(use-package compile-angel
-  :demand t
-  :ensure t
-  :custom
-  ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
-  ;; Drawback: The minibuffer will not display compile-angel's actions.
-  (compile-angel-verbose t)
-
-  :config
-  ;; The following directive prevents compile-angel from compiling your init
-  ;; files. If you choose to remove this push to `compile-angel-excluded-files'
-  ;; and compile your pre/post-init files, ensure you understand the
-  ;; implications and thoroughly test your code. For example, if you're using
-  ;; the `use-package' macro, you'll need to explicitly add:
-  ;; (eval-when-compile (require 'use-package))
-  ;; at the top of your init file.
-  (push "/init.el" compile-angel-excluded-files)
-  (push "/early-init.el" compile-angel-excluded-files)
-  (push "/pre-init.el" compile-angel-excluded-files)
-  (push "/post-init.el" compile-angel-excluded-files)
-  (push "/pre-early-init.el" compile-angel-excluded-files)
-  (push "/post-early-init.el" compile-angel-excluded-files)
-
-  ;; A local mode that compiles .el files whenever the user saves them.
-  ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
-
-  ;; A global mode that compiles .el files prior to loading them via `load' or
-  ;; `require'. Additionally, it compiles all packages that were loaded before
-  ;; the mode `compile-angel-on-load-mode' was activated.
-  (compile-angel-on-load-mode 1))
-#+end_src
-** Dired
-Configuraciones para dired
-#+begin_src emacs-lisp
-  ;;; Dired
   (with-eval-after-load 'dired
     (require 'dired-x)
-      ;; Set dired-x global variables here. For example: (setq dired-x-hands-off-my-keys nil)
-      )
-
-  (setq dired-listing-switches
-  	      "-lta --dired --group-directories-first -h -G" ;; lt es ordenado por tiempo
-  	      dired-dwim-target t
-  	      dired-guess-shell-alist-user
-  	      '(("\\.\\(png\\|jpe?g\\|tiff\\)" "sxiv" "xdg-open") ; abrir con ! o &
-              ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
-  		(".pdf" "rifle")
-  		(".*" "xdg-open"))
-  	      dired-omit-files "^\\."
-  	      dired-kill-when-opening-new-dired-buffer t)
-  (add-hook 'dired-mode-hook
-  	  'dired-omit-mode)
-#+end_src
-** Icons
-#+begin_src emacs-lisp
-  ;; ;;; all-the-icons
-  ;; (use-package all-the-icons
-  ;;   :if (display-graphic-p)
-  ;;   :ensure t)
-  ;; 
-  ;; (use-package all-the-icons-dired
-  ;;   :ensure t
-  ;;   :if (display-graphic-p)
-  ;;   :config (setq all-the-icons-dired-monochrome nil))
-  ;;   (add-hook 'dired-mode-hook
-  ;;         #'all-the-icons-dired-mode))
-  ;; 
-  (use-package nerd-icons
-    :ensure t
-    ;; :custom
-    ;; The Nerd Font you want to use in GUI
-    ;; "Symbols Nerd Font Mono" is the default and is recommended
-    ;; but you can use any other Nerd Font if you want
-    ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+    ;; Set dired-x global variables here. For example: (setq dired-x-hands-off-my-keys nil)
     )
 
-  ;; nerd-icons
+  (add-hook 'dired-mode-hook 'dired-omit-mode)
+  (setq
+   dired-listing-switches "-la --dired --group-directories-first -h -G" ;; "-lt para ordenar por tiempo"
+   dired-dwim-target t
+   dired-omit-files "^\\."
+   dired-kill-when-opening-new-dired-buffer t
+   dired-guess-shell-alist-user '(
+                                  ("\\.\\(png\\|jpe?g\\|tiff\\)" "sxiv" "xdg-open") ; abrir con ! o &
+                                  ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
+                                  (".pdf" "rifle")
+                                  (".*" "xdg-open")
+                                  )
+   )
+#+end_src
+
+* Icons
+#+begin_src emacs-lisp
+  (use-package nerd-icons
+    :ensure t
+    :if (display-graphic-p)
+    :custom
+    ;; (nerd-icons-font-family "Symbols Nerd Font Mono") ; "Symbols Nerd Font Mono" is the default and is recommended. You can change it anyways
+    ;; Whether display the icons.
+    (nerd-icons-ibuffer-icon t)
+    ;; Whether display the colorful icons.
+    ;; It respects `nerd-icons-color-icons'.
+    (nerd-icons-ibuffer-color-icon t)
+    ;; The default icon size in ibuffer.
+    (nerd-icons-ibuffer-icon-size 1.0)
+    ;; Use human readable file size in ibuffer.
+    (nerd-icons-ibuffer-human-readable-size t)
+    ;; Slow Rendering
+    ;; If you experience a slow down in performance when rendering multiple icons simultaneously,
+    ;; you can try setting the following variable
+    (inhibit-compacting-font-caches t)
+    )
+
+  ;; completions
   (use-package nerd-icons-completion
     :ensure t
-    :after marginalia
+    :if (display-graphic-p)
+    :after (marginalia nerd-icons)
     :config
-    (nerd-icons-completion-mode))
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+    (nerd-icons-completion-mode)
+    :hook (marginalia-mode nerd-icons-completion-marginalia-setup))
 
   ;; dired
   (use-package nerd-icons-dired
     :ensure t
+    :if (display-graphic-p)
+    :after nerd-icons
     :delight
     :hook
     (dired-mode . nerd-icons-dired-mode))
 
   ;; ibuffer
-  (global-set-key (kbd "C-x C-b") 'ibuffer)
   (use-package nerd-icons-ibuffer
     :ensure t
+    :if (display-graphic-p)
+    :after nerd-icons
+    :bind ("C-x C-b" . ibuffer)
     :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
-
-  ;; Whether display the icons.
-  (setq nerd-icons-ibuffer-icon t)
-
-  ;; Whether display the colorful icons.
-  ;; It respects `nerd-icons-color-icons'.
-  (setq nerd-icons-ibuffer-color-icon t)
-
-  ;; The default icon size in ibuffer.
-  (setq nerd-icons-ibuffer-icon-size 1.0)
-
-  ;; Use human readable file size in ibuffer.
-  (setq  nerd-icons-ibuffer-human-readable-size t)
-
-  ;; Slow Rendering
-  ;; If you experience a slow down in performance when rendering multiple icons simultaneously,
-  ;; you can try setting the following variable
-  (setq inhibit-compacting-font-caches t)
-#+end_src
-** Evil Mode
-Como prerequisito, undo-fu
-#+begin_src emacs-lisp
-  ;; ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
-  ;; ;; system, providing more convenient undo/redo functionality.
-  (use-package undo-fu
-    :ensure t
-    :commands (undo-fu-only-undo
-               undo-fu-only-redo
-               undo-fu-only-redo-all
-               undo-fu-disable-checkpoint)
-    :config
-    (global-unset-key (kbd "C-z"))
-    (global-set-key (kbd "C-z") 'undo-fu-only-undo)
-    (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
-
-  ;; The undo-fu-session package complements undo-fu by enabling the saving
-  ;; ;; and restoration of undo history across Emacs sessions, even after restarting.
-  ;; (use-package undo-fu-session
-  ;;   :ensure t
-  ;;   :commands undo-fu-session-global-mode
-  ;;   :hook (after-init . undo-fu-session-global-mode))
 #+end_src
 
-Agora sim
+* Evil
 #+begin_src emacs-lisp
-  ;; Vim emulation
   (use-package evil
     :ensure t
+    :defer t
     :commands (evil-mode evil-define-key)
-    :hook (after-init . evil-mode)
+    ;; :hook (after-init . evil-mode)
 
     :init
     ;; It has to be defined before evil
     (setq evil-want-integration t
-          evil-want-keybinding nil
-          evil-default-state 'emacs
-          evil-undo-system 'undo-fu)
+        evil-want-keybinding nil
+        evil-default-state 'emacs
+        evil-undo-system 'undo-fu)
 
     :custom
     ;; Make :s in visual mode operate only on the actual visual selection
@@ -597,23 +477,93 @@ Agora sim
     ;; Disable wrapping of search around buffer
     (evil-search-wrap nil)
     ;; Whether Y yanks to the end of the line
-    (evil-want-Y-yank-to-eol t))
-
-  (use-package evil-collection
-    ;; :delight evil-collection-unimpaired-mode 
-    :after evil
-    :ensure t
-    :init
-    ;; It has to be defined before evil-colllection
-    (setq evil-collection-setup-minibuffer t)
-    (setq evil-collection-want-unimpaired-p nil)
+    (evil-want-Y-yank-to-eol t)
+    
     :config
-    (evil-collection-init))
+    ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
+    ;; system, providing more convenient undo/redo functionality.
+    (use-package undo-fu
+      :defer t
+      :ensure t
+      :commands (undo-fu-only-undo
+                 undo-fu-only-redo
+                 undo-fu-only-redo-all
+                 undo-fu-disable-checkpoint)
+      :config
+      (global-unset-key (kbd "C-z"))
+      (global-set-key (kbd "C-z") 'undo-fu-only-undo)
+      (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+    
+    ;; The undo-fu-session package complements undo-fu by enabling the saving
+    ;; and restoration of undo history across Emacs sessions, even after restarting.
+    ;; (use-package undo-fu-session
+    ;;   :ensure t
+    ;;   :commands undo-fu-session-global-mode
+    ;;   :hook (after-init . undo-fu-session-global-mode))
 
-  (use-package evil-escape
-    :delight
+    (use-package evil-collection
+      ;; :delight evil-collection-unimpaired-mode 
+      :after evil
+      :ensure t
+      :init
+      ;; It has to be defined before evil-colllection
+      (setq evil-collection-setup-minibuffer t)
+      (setq evil-collection-want-unimpaired-p nil)
+      :config
+      (evil-collection-init))
+    
+    (use-package evil-escape
+      :delight
+      :after evil
+      :ensure t
+      :config
+      (setq evil-escape-key-sequence "jk")
+      (evil-escape-mode 1)))
+#+end_src
+
+* darkroom
+Remove visual distractions and focus on writing.
+#+begin_src emacs-lisp
+  (use-package darkroom
     :ensure t
+    :defer t)
+#+end_src
+
+* denote
+#+begin_src emacs-lisp
+  (use-package denote
+    :ensure t
+    :hook (dired-mode . denote-dired-mode)
+    :bind
+    (("C-c n n" . denote)
+     ("C-c n r" . denote-rename-file)
+     ("C-c n l" . denote-link)
+     ("C-c n b" . denote-backlinks)
+     ("C-c n d" . denote-dired)
+     ("C-c n g" . denote-grep))
     :config
-    (setq evil-escape-key-sequence "jk")
-    (evil-escape-mode 1))
+    (setq denote-directory (expand-file-name "~/notes/"))
+
+    ;; Automatically rename Denote buffers when opening them so that
+    ;; instead of their long file name they have, for example, a literal
+    ;; "[D]" followed by the file's title.  Read the doc string of
+    ;; `denote-rename-buffer-format' for how to modify this.
+    (denote-rename-buffer-mode 1))
+#+end_src
+
+* windmove
+#+begin_src emacs-lisp
+  (use-package windmove
+    :ensure nil
+    :bind*
+    (
+     ("M-<left>"  . windmove-left)
+     ("M-<right>" . windmove-right)
+     ("M-<up>"    . windmove-up)
+     ("M-<down>"  . windmove-down)
+     ("M-S-<left>"  . windmove-swap-states-left)
+     ("M-S-<right>" . windmove-swap-states-right)
+     ("M-S-<up>"    . windmove-swap-states-up)
+     ("M-S-<down>"  . windmove-swap-states-down)
+     ))
 #+end_src
