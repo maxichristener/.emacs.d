@@ -18,7 +18,7 @@
 - [[#dired][Dired]]
 - [[#icons][Icons]]
 - [[#evil][Evil]]
-- [[#darkroom][darkroom]]
+- [[#darkroom-zen-mode][darkroom (zen-mode)]]
 - [[#denote][denote]]
 - [[#windmove][windmove]]
 
@@ -41,7 +41,7 @@ Algunos tips útiles para la navegación:
     ;; (set-face-attribute 'default nil :height 125) ;; default zoom
 
     ;; functions
-    (defun open-config-file ()
+    (defun christener/open-config-file ()
       "Opens config.org"
       (interactive)
       (progn 
@@ -81,7 +81,7 @@ Algunos tips útiles para la navegación:
     
     :bind
     ("C-x C-a" . auto-fill-mode)
-    ("C-x M-x" . open-config-file)
+    ("C-x M-x" . christener/open-config-file)
     ("s-r" . window-rotate-split)
     ("s--" . shrink-window)
     ("s-+" . enlarge-window)
@@ -553,12 +553,15 @@ improving syntax accuracy and consistency across supported languages.
       (evil-escape-mode 1)))
 #+end_src
 
-* darkroom
+* darkroom (zen-mode)
 Remove visual distractions and focus on writing.
 #+begin_src emacs-lisp
   (use-package darkroom
     :ensure t
-    :defer t)
+    :defer t
+    :hook (darkroom-mode . visual-line-mode)
+    :bind
+    (("s-z" . darkroom-mode)))
 #+end_src
 
 * denote
