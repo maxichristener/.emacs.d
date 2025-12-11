@@ -7,3 +7,7 @@
  (expand-file-name
   "config.org"
   user-emacs-directory))
+
+;; no me gusta la papelera (esto es de minimal emacs, por default ya es nil)
+(setq delete-by-moving-to-trash nil)
+(setq remote-file-name-inhibit-delete-by-moving-to-trash nil)
