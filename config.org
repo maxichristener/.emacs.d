@@ -3,6 +3,7 @@
 
 * Índice :TOC:
 - [[#emacs][Emacs]]
+- [[#gpg-epg-easypg-library][GPG: epg (EasyPG library)]]
 - [[#delight][Delight]]
 - [[#python][Python]]
 - [[#latex][LaTeX]]
@@ -93,6 +94,14 @@ Algunos tips útiles para la navegación:
     ("s-u" . (lambda ()
                (interactive)
                (previous-line 20)))
+    )
+#+end_src
+
+* GPG: epg (EasyPG library)
+#+begin_src emacs-lisp
+  (use-package epg
+    :custom
+    (epg-pinentry-mode 'loopback)
     )
 #+end_src
 
