@@ -9,7 +9,7 @@
 - [[#latex][LaTeX]]
 - [[#dashboard][Dashboard]]
 - [[#magit][Magit]]
-- [[#terminal][Terminal]]
+- [[#terminal-emulators][Terminal emulators]]
 - [[#marginalia][Marginalia]]
 - [[#org-mode][Org Mode]]
   - [[#expansions-in-org-tempo][Expansions in Org-Tempo]]
@@ -19,9 +19,9 @@
 - [[#dired][Dired]]
 - [[#icons][Icons]]
 - [[#evil][Evil]]
-- [[#darkroom-zen-mode][darkroom (zen-mode)]]
-- [[#denote][denote]]
-- [[#windmove][windmove]]
+- [[#darkroom-zen-mode][Darkroom (zen-mode)]]
+- [[#denote][Denote]]
+- [[#windmove][Windmove]]
 
 * Emacs
 Algunos tips útiles para la navegación:
@@ -37,7 +37,6 @@ Algunos tips útiles para la navegación:
     :config
     (load-theme 'modus-vivendi t)
     (delete-selection-mode 1)
-    (electric-pair-mode 1)
     (add-to-list 'default-frame-alist `(font . ,default-emacs-font))
     ;; (set-face-attribute 'default nil :height 125) ;; default zoom
     (unless (display-graphic-p)
@@ -86,6 +85,9 @@ Algunos tips útiles para la navegación:
     (column-number-mode t)
     (mode-line-position-column-line-format '("%l:%C"))
     
+    :hook
+    ((python-mode TeX-mode) . electric-pair-mode)
+
     :bind
     ("C-x C-a" . auto-fill-mode)
     ("C-x M-x" . christener/open-config-file)
@@ -201,7 +203,7 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
     :defer t)
 #+end_src
 
-* Terminal
+* Terminal emulators
 #+begin_src emacs-lisp
   ;;; vterm
   (use-package vterm
@@ -231,6 +233,7 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
 #+end_src
 
 * Marginalia
+Enrich existing commands with completion annotations
 #+begin_src emacs-lisp
   (use-package marginalia
     :ensure t
@@ -250,32 +253,18 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
 #+end_src
 
 * Org Mode
-Emacs todavía existe gracias a Org Mode. Una lástima que no se haya
-convertido en un estándar como Markdown
-
-** Expansions in Org-Tempo
-Org-tempo agrega un snippet para escribir bloques en Org. A saber,
-
-| Typing the below + TAB | Expands to ...                          |
-|------------------------+-----------------------------------------|
-| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
-| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
-| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
-| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
-| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
-| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
-| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
-| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
-| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
-| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
+Una lástima que el formato, independientemente de Emacs, no se haya convertido
+en un estándar como Markdown.
 
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :hook (org-mode . (lambda () (electric-indent-local-mode -1)))
+    :config
+    (electric-indent-local-mode -1)
+    :hook
+    (org-mode . org-indent-mode)
     :custom
-    (require 'org-tempo)
-    (org-format-latex-options (plist-put org-format-latex-options :scale 2.4))
     ;; (org-hide-emphasis-markers t)
+    (org-format-latex-options (plist-put org-format-latex-options :scale 2.4))
     (header-line-format nil)
     (org-emphasis-alist
      '(("*" (bold :foreground "LightSalmon1"))
@@ -284,20 +273,12 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
        ("=" (:background "maroon" :foreground "white"))
        ("~" (:background "deep sky blue" :foreground "MidnightBlue"))
        ("+" (:strike-through t))))
-    :config
-    ;; pure lisp magic :D
-    (dolist (face '((org-level-1 . 1.2)
-                    (org-level-2 . 1.1)
-                    (org-level-3 . 1.05)
-                    (org-level-4 . 1.0)
-                    (org-level-5 . 1.1)
-                    (org-level-6 . 1.1)
-                    (org-level-7 . 1.1)
-                    (org-level-8 . 1.1)))
-      (set-face-attribute (car face) nil
-                          :font default-emacs-font
-                          :weight 'medium
-                          :height (cdr face))))
+    :custom-face ;; list-faces-display
+    (org-level-1 ((t (:foreground "SlateGray2" :weight bold :height 1.3))))
+    (org-level-2 ((t (:foreground "NavajoWhite3" :weight bold :height 1.1))))
+    (org-level-3 ((t (:weight medium :height 1.05))))
+    (org-level-4 ((t (:weight medium :height 1.0))))
+    )
 
   ;; TOC
   (use-package toc-org
@@ -317,7 +298,6 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
   ;;   (org-image-actual-width nil)
   ;;   (header-line-format " ")
   ;;   :hook (org-tree-slide-mode . (lambda () (display-line-numbers-mode 0))))
-  ;; 
   ;; ;; Para ver en html
   ;; (use-package ox-reveal
   ;;   :ensure t
@@ -325,13 +305,23 @@ Org-tempo agrega un snippet para escribir bloques en Org. A saber,
 
   ;; ;;; OLD ;;; ;;
   ;; (add-hook 'org-mode-hook 'variable-pitch-mode)
-  ;; (custom-theme-set-faces
-  ;;  'user
-  ;;  '(variable-pitch ((t (:family "SauceCodePro NF" :height 180))))
-  ;;  '(fixed-pitch ((t (:family "SauceCodePro NF" :height 160)))))
-  ;;; org indent                         
-  ;; (add-hook 'org-mode-hook 'org-indent-mode)
 #+END_SRC
+
+** Expansions in Org-Tempo
+Org-tempo agrega un snippet para escribir bloques en Org. A saber,
+
+| Typing the below + TAB | Expands to ...                          |
+|------------------------+-----------------------------------------|
+| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
+| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
+| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
+| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
+| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
+| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
+| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
+| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
+| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
+| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
 
 * Markdown
 /markdown-mode (this should be built-in into emacs...)/
@@ -353,7 +343,14 @@ Markdown (GFM).
            ("README\\.md\\'" . gfm-mode))
     :bind
     (:map markdown-mode-map
-          ("C-c C-e" . markdown-do)))
+          ("C-c C-e" . markdown-do))
+    :custom-face ;; list-faces-display
+    (markdown-header-face-1 ((t (:foreground "#ff8c69" :weight bold :height 1.4))))
+    (markdown-header-face-2 ((t (:foreground "#bbffff" :weight bold :height 1.2))))
+    (markdown-header-face-3 ((t (:foreground "#ffec8b" :weight bold))))
+    (markdown-italic-face ((t (:foreground "#bfefff" :slant italic))))
+    (markdown-bold-face   ((t (:foreground "#ff34b3" :weight bold))))
+    )
 
   ;; TOC... why not?
   ;; Automatically generate a table of contents when editing Markdown files
@@ -430,10 +427,10 @@ improving syntax accuracy and consistency across supported languages.
    dired-omit-files "^\\."
    dired-kill-when-opening-new-dired-buffer t
    dired-guess-shell-alist-user '(
-                                  ("\\.\\(png\\|jpe?g\\|tiff\\)" "sxiv" "xdg-open") ; abrir con ! o &
+                                  ("\\.\\(png\\|jpe?g\\|tiff\\)" "imv" "xdg-open") ; abrir con ! o &
                                   ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
-                                  (".pdf" "rifle")
-                                  (".*" "xdg-open")
+                                  (".*" "rifle")
+;;                                  (".*" "xdg-open")
                                   )
    )
 #+end_src
@@ -491,8 +488,8 @@ improving syntax accuracy and consistency across supported languages.
     :init
     ;; It has to be defined before evil
     (setq evil-want-integration t
-        evil-want-keybinding nil
-        evil-default-state 'emacs
+        evil-want-keybinding t
+        evil-default-state 'normal
         evil-undo-system 'undo-fu)
 
     :custom
@@ -528,6 +525,7 @@ improving syntax accuracy and consistency across supported languages.
     (evil-want-Y-yank-to-eol t)
     
     :config
+    (evil-set-initial-state 'dired-mode 'emacs)
     ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
     ;; system, providing more convenient undo/redo functionality.
     (use-package undo-fu
@@ -542,34 +540,17 @@ improving syntax accuracy and consistency across supported languages.
       (global-set-key (kbd "C-z") 'undo-fu-only-undo)
       (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
     
-    ;; The undo-fu-session package complements undo-fu by enabling the saving
-    ;; and restoration of undo history across Emacs sessions, even after restarting.
-    ;; (use-package undo-fu-session
-    ;;   :ensure t
-    ;;   :commands undo-fu-session-global-mode
-    ;;   :hook (after-init . undo-fu-session-global-mode))
-
-    (use-package evil-collection
-      ;; :delight evil-collection-unimpaired-mode 
-      :after evil
-      :ensure t
-      :init
-      ;; It has to be defined before evil-colllection
-      (setq evil-collection-setup-minibuffer t)
-      (setq evil-collection-want-unimpaired-p nil)
-      :config
-      (evil-collection-init))
-    
     (use-package evil-escape
       :delight
       :after evil
       :ensure t
       :config
       (setq evil-escape-key-sequence "jk")
-      (evil-escape-mode 1)))
+      (evil-escape-mode 1))
+    )
 #+end_src
 
-* darkroom (zen-mode)
+* Darkroom (zen-mode)
 Remove visual distractions and focus on writing.
 #+begin_src emacs-lisp
   (use-package darkroom
@@ -580,7 +561,8 @@ Remove visual distractions and focus on writing.
     (("s-z" . darkroom-mode)))
 #+end_src
 
-* denote
+* Denote
+Un paquete para tomar notas (ver manual).
 #+begin_src emacs-lisp
   (use-package denote
     :ensure t
@@ -602,7 +584,10 @@ Remove visual distractions and focus on writing.
     (denote-rename-buffer-mode 1))
 #+end_src
 
-* windmove
+* Windmove
+Emacs tiene un paquete para moverse de una manera más comoda entre ventanas.
+Estas keybindings simulan un tiling window manager, lo que en mi opinión
+complementa el uso de un stacking window manager (labwc en mi caso).
 #+begin_src emacs-lisp
   (use-package windmove
     :ensure nil

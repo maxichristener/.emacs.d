@@ -3,6 +3,7 @@
 ;; Literate config
 ;;(straight-use-package 'org)
 (require 'org)
+(require 'org-tempo)
 (org-babel-load-file
  (expand-file-name
   "config.org"
