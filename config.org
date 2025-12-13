@@ -55,7 +55,7 @@ Algunos tips útiles para la navegación:
         (message "Displaying config.org")))
 
     ;; https://www.emacswiki.org/emacs/ToggleWindowSplit
-    (defun window-rotate-split ()
+    (defun christener/window-rotate-split ()
       "Switch window split from horizontally to vertically, or vice versa."
       (interactive)
       (require 'windmove)
@@ -78,7 +78,7 @@ Algunos tips útiles para la navegación:
                         (split-window-vertically)
                       (split-window-horizontally))
                     (set-window-buffer (windmove-find-other-window neighbour-dir) other-buf))))))))
-
+    
     :custom
     (auth-source-save-behavior nil) ; auth-source never saves
     (line-number-mode t)
@@ -89,20 +89,20 @@ Algunos tips útiles para la navegación:
     ((python-mode TeX-mode) . electric-pair-mode)
 
     :bind
-    ("C-x C-a" . auto-fill-mode)
+    ;; minor modes
+    ("C-x C-M-a" . auto-fill-mode)
+    ("C-x C-M-v" . visual-line-mode)
+    ;; custom functions
     ("C-x M-x" . christener/open-config-file)
-    ("s-r" . window-rotate-split)
+    ("s-r" . christener/window-rotate-split)
+    ;; alternative keybindings for resizing
     ("s--" . shrink-window)
     ("s-+" . enlarge-window)
     ("C-s--" . shrink-window-horizontally)
     ("C-s-+" . enlarge-window-horizontally)
-    ("s-d" . (lambda ()
-               (interactive) 
-               (next-line 20)))
-    ("s-u" . (lambda ()
-               (interactive)
-               (previous-line 20)))
-    ("C-x C-M-v" . visual-line-mode)
+    ;; vim-like C-d C-u motions
+    ("s-d" . (lambda () (interactive) (next-line 20)))
+    ("s-u" . (lambda () (interactive) (previous-line 20)))
     )
 #+end_src
 
@@ -558,7 +558,7 @@ Remove visual distractions and focus on writing.
     :defer t
     :hook (darkroom-mode . visual-line-mode)
     :bind
-    (("s-z" . darkroom-mode)))
+    (("C-x C-M-z" . darkroom-mode)))
 #+end_src
 
 * Denote
