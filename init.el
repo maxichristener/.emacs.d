@@ -16,8 +16,8 @@
   )
 
 ;; some modes
+(delete-selection-mode 1)
 (setq auth-source-save-behavior nil ; auth-source never saves
-      delete-selection-mode t
       line-number-mode t
       column-number-mode t)
 
