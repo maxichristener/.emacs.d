@@ -80,7 +80,9 @@ Algunos tips útiles para la navegación:
     
     :custom
     (mode-line-position-column-line-format '("%l:%C"))
-    
+    (ispell-dictionary "es_AR")
+    (ispell-program-name "hunspell")
+
     :hook
     ((python-mode TeX-mode) . electric-pair-mode)
 
