@@ -418,23 +418,32 @@ improving syntax accuracy and consistency across supported languages.
 * Dired
 #+begin_src emacs-lisp
   (with-eval-after-load 'dired
+    (defun christener/dired-mouse-find-file (event)
+      "In Dired, visit the file or directory name you click on."
+      (interactive "e")
+      (let ((window (posn-window (event-end event))))
+        (select-window window)
+        (goto-char (posn-point (event-end event)))
+        (dired-find-file)))
+
+    (keymap-set dired-mode-map "<mouse-2>" 'christener/dired-mouse-find-file)
     (require 'dired-x)
-    ;; Set dired-x global variables here. For example: (setq dired-x-hands-off-my-keys nil)
+
+    (setq
+     dired-listing-switches "-la --dired --group-directories-first -h -G" ;; "-lt para ordenar por tiempo"
+     dired-dwim-target t
+     dired-omit-files "^\\."
+     dired-kill-when-opening-new-dired-buffer t
+     dired-guess-shell-alist-user '(
+                                    ("\\.\\(png\\|jpe?g\\|tiff\\)" "imv" "xdg-open") ; abrir con ! o &
+                                    ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
+                                    (".*" "rifle")
+    				  ;;                                  (".*" "xdg-open")
+                                    )
+     )
     )
 
   (add-hook 'dired-mode-hook 'dired-omit-mode)
-  (setq
-   dired-listing-switches "-la --dired --group-directories-first -h -G" ;; "-lt para ordenar por tiempo"
-   dired-dwim-target t
-   dired-omit-files "^\\."
-   dired-kill-when-opening-new-dired-buffer t
-   dired-guess-shell-alist-user '(
-                                  ("\\.\\(png\\|jpe?g\\|tiff\\)" "imv" "xdg-open") ; abrir con ! o &
-                                  ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open")
-                                  (".*" "rifle")
-;;                                  (".*" "xdg-open")
-                                  )
-   )
 #+end_src
 
 * Icons
