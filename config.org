@@ -125,6 +125,8 @@ package name with ‘-mode’ appended, provide a symbol instead.
 
 * Python
 #+begin_src emacs-lisp
+  (setq python-shell-process-environment '("PYTHON_BASIC_REPL=1"))
+  
   (use-package uv-mode
     :ensure t
     :hook (python-mode . uv-mode-auto-activate-hook))

@@ -320,3 +320,7 @@
 ;; regardless of the change.
 (setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
 (setq save-abbrevs 'silently)
+
+;; eldoc
+(setq eldoc-echo-area-use-multiline-p nil
+      eldoc-echo-area-prefer-doc-buffer t)
