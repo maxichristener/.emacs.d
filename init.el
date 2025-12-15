@@ -214,8 +214,8 @@
 ;;(setq-default electric-indent-chars '(?\n ?\^?))
 
 ;; Enable indentation and completion using the TAB key
-(setq tab-always-indent 'complete)
-(setq tab-first-completion 'word-or-paren-or-punct)
+;; (setq tab-always-indent 'complete)
+;; (setq tab-first-completion 'word-or-paren-or-punct)
 
 ;; Perf: Reduce command completion overhead.
 (setq read-extended-command-predicate #'command-completion-default-include-p)
