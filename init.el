@@ -59,7 +59,7 @@
       comint-buffer-maximum-size 4096)
 
 ;; compilation
-(setq compilation-scroll-output 'first-error)
+;; (setq compilation-scroll-output 'first-error)
 
 ;;; Backup files
 ;; Avoid backups or lockfiles to prevent creating world-readable copies of files
