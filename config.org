@@ -132,11 +132,13 @@ package name with ‘-mode’ appended, provide a symbol instead.
 
 * Python
 #+begin_src emacs-lisp
-  (setq python-shell-process-environment '("PYTHON_BASIC_REPL=1"))
-  
-  (use-package uv-mode
-    :ensure t
-    :hook (python-mode . uv-mode-auto-activate-hook))
+  (use-package python
+    :config
+    (if (executable-find "ipython3")
+        (setq python-shell-interpreter "ipython3"
+              python-shell-interpreter-args "--simple-prompt --classic")
+      (setq python-shell-process-environment '("PYTHON_BASIC_REPL=1")))
+    )
 #+end_src
 
 * LaTeX
