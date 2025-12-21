@@ -134,13 +134,28 @@ package name with ‘-mode’ appended, provide a symbol instead.
 
 * Python
 #+begin_src emacs-lisp
-  (use-package python
+  ;; to avoid dumb terminal warning
+  (setq python-shell-process-environment '("PYTHON_BASIC_REPL=1"))
+
+  (use-package pythonic
+    :ensure t
     :config
-    (if (executable-find "ipython3")
-        (setq python-shell-interpreter "ipython3"
-              python-shell-interpreter-args "--simple-prompt --classic")
-      (setq python-shell-process-environment '("PYTHON_BASIC_REPL=1")))
+    (defun python-run-venv ()
+      "Activate the .venv in the current directory (if available) and start a Python REPL."
+      (interactive)
+      (let ((venv-dir (file-name-concat default-directory ".venv")))
+        (if (file-directory-p venv-dir)
+  	    (progn
+  	      (pythonic-activate (file-name-concat default-directory ".venv"))
+  	      (run-python)
+  	      (switch-to-buffer-other-window "*Python*"))
+  	(message "Cannot find virtualenv in the current directory")
+  	)))
+    :bind
+    (:map dired-mode-map
+  	("<f8>" . python-run-venv))
     )
+
 #+end_src
 
 * LaTeX
@@ -393,6 +408,8 @@ Markdown (GFM).
    (company-dabbrev-code-ignore-case nil)
   :hook
   (python-mode org-mode TeX-mode lisp-mode)
+  :bind
+  ("C-x C-M-c" . company-mode)
   )
   ;; To prevent default down-casing.
   ;; https://emacs.stackexchange.com/questions/10837/how-to-make-company-mode-be-case-sensitive-on-plain-text
@@ -438,12 +455,10 @@ improving syntax accuracy and consistency across supported languages.
         (dired-find-file)))
 
     (keymap-set dired-mode-map "<mouse-2>" 'christener/dired-mouse-find-file)
-    (require 'dired-x)
 
+    (require 'dired-x)
     (setq
      dired-listing-switches "-la --dired --group-directories-first -h -G" ;; "-lt para ordenar por tiempo"
-     dired-dwim-target t
-     dired-omit-files "^\\."
      dired-kill-when-opening-new-dired-buffer t
      dired-guess-shell-alist-user '(
                                 ;;  ("\\.\\(png\\|jpe?g\\|tiff\\)" "imv" "xdg-open") ; abrir con ! o &
@@ -451,6 +466,7 @@ improving syntax accuracy and consistency across supported languages.
     				  ;;  (".*" "xdg-open")
                                     (".*" "rifle")
                                     )
+     dired-omit-files (concat dired-omit-files "\\|^\\..+$")
      )
     )
 
