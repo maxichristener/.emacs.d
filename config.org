@@ -88,6 +88,7 @@ Algunos tips útiles para la navegación:
 
     :hook
     ((python-mode TeX-mode) . electric-pair-mode)
+    (prog-mode . display-line-numbers-mode)
 
     :bind
     ;; minor modes
@@ -141,7 +142,7 @@ Algunos tips útiles para la navegación:
   ;; Finally, load your theme of choice (or a random one with
   ;; `modus-themes-load-random', `modus-themes-load-random-dark',
   ;; `modus-themes-load-random-light').
-  (modus-themes-load-theme 'ef-deuteranopia-light))
+  (modus-themes-load-theme 'ef-dark))
 #+end_src
 
 * GPG: epg (EasyPG library)
