@@ -285,6 +285,17 @@ Usamos =auctex=. No confundir =latex-mode= (built-in into emacs) con
     ;;(eshell-rc-script (concat user-emacs-directory "eshell/profile")    ; your profile for eshell; like a bashrc for eshell.
     ;;(eshell-aliases-file (concat user-emacs-directory "eshell/aliases") ; sets an aliases file for the eshell. 
     )
+
+  ;; eat
+  (use-package eat
+    :ensure t
+    :bind
+    ("s-<return>" . eat)
+    ("s-e" . eat-project)
+    :custom
+    (eat-enable-directory-tracking t)
+    (eat-query-before-killing-running-terminal nil)
+    )
 #+end_src
 
 * Marginalia
